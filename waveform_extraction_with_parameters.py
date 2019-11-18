@@ -375,38 +375,58 @@ def pipeline():
 	return (res)
 
 def get_fc_param():
-	res= {}
+	res = {}
 	with open("fc_param_dumps.txt", "r") as file:
-		res= json.load(file)
+		res = json.load(file)
 	return (res)
 
+
 if __name__ == '__main__':
-	STARTTIME= time.time()
+
+	STARTTIME = time.time()
 
 	FC_PARAM= get_fc_param()
 
 	SIG_INTERESTED= ["II", "V", "ABP", "MCL1", "PLETH", 
 					 "AVR", "III", "I", "RESP", "PAP"]
 
-	WFID_FN= "wf_id_matched_wf.txt"
+	WFID_FN = "wf_id_matched_wf.txt"
 	WFID_LIST, WFID_SORTEDKEY= readin_wfid(WFID_FN)
 
-	TFR_DICT= readin_tfr_dict()
+	TFR_DICT = readin_tfr_dict()
 	ICUSTAY= readin_icustay()
 
-	N= 5960
-	START, END= cl_parse()
-	FN_OUT= "wfdict"+str(START)+"_"+str(END)+".txt"
+	N = 5960
+
+	# output batch size = 10
+	# start = 0
+	# end = 19 --> change to 5960 for ultimate results 
+	starti,endi = cl_parse()
+	for i in range(starti, endi):
+		START = i*10
+		END = (i+1)*10
+		
+		FN_OUT = "wfdict"+str(START)+"_"+str(END)+".txt"
+		res = pipeline()
+
+		with open(FN_OUT, 'w') as file:
+			file.write(json.dumps(res))
+
+		ENDTIME = time.time()
+		print ("num of sid: ", len(res.keys()))
+		print ("lapse time: ", ENDTIME-STARTTIME)
+	
+	
 
 	# my_dict= {}
 	# my_dict= my_dict.fromkeys(wfid_sortedkey[start:end], {})
 	#print (my_dict)
 
-	res= pipeline()
+	# res = pipeline()
 
-	with open(FN_OUT, 'w') as file:
-		file.write(json.dumps(res))
+	# with open(FN_OUT, 'w') as file:
+	# 	file.write(json.dumps(res))
 
-	ENDTIME= time.time()
-	print ("num of sid: ", len(res.keys()))
-	print ("lapse time: ", ENDTIME-STARTTIME)
+	# ENDTIME = time.time()
+	# print ("num of sid: ", len(res.keys()))
+	# print ("lapse time: ", ENDTIME-STARTTIME)
